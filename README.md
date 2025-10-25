@@ -1,242 +1,302 @@
-# Sk## ✨ Key Features
+# 🏥 Advanced Skin Cancer Detection System
 
-### Location-Aware Healthcare
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![React](https://img.shields.io/badge/React-18.0+-61dafb.svg)](https://reactjs.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.1+-000000.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- **GPS Location Detection**: Click the map marker button to auto-detect your location
-- **Reverse Geocoding**: Automatically converts coordinates to city/state names
-- **Personalized Hospital Recommendations**: AI suggests local healthcare facilities based on your location
-- **Emergency Resources**: Location-specific emergency contact information
+An AI-powered web application for skin cancer detection using deep learning, with comprehensive patient history management and professional PDF report generation.
 
-### Medical Insights Sections
+![Skin Cancer Detection](result_visualization.png)
 
-The AI provides comprehensive medical guidance in these formatted sections:
+## 🌟 Key Features
 
-- 📋 **Condition Overview**: Clear explanation of the detected condition
-- ⚠️ **Important Precautions**: Actionable safety measures and next steps
-- 🏥 **Recommended Medical Care**: Appropriate healthcare facilities and specialists
-- 🗺️ **Nearest Hospital Recommendations**: Local hospital suggestions with directions
-- 🚨 **Emergency Signs**: When to seek immediate medical attention
-- 💝 **Supportive Message**: Compassionate guidance and encouragementr Detection Web Application
+### 🔬 **Advanced AI Detection**
+- **Roboflow Integration**: State-of-the-art skin lesion classification
+- **XGBoost Ensemble**: Multi-model predictions for higher accuracy
+- **7 Condition Types**: Detects melanoma, basal cell carcinoma, and more
+- **Confidence Scoring**: Transparent AI predictions with uncertainty quantification
 
-A comprehensive AI-powered web application for skin cancer detection using Roboflow models and Groq LLM for personalized medical insights.
+### 🤖 **Intelligent Insights**
+- **Groq LLM Integration**: Personalized medical advice powered by AI
+- **Explainable AI (XAI)**: LIME, SHAP, and saliency maps for transparency
+- **Location-Aware**: GPS-based hospital recommendations
+- **Risk Assessment**: Automated risk level classification
 
-## Features
+### 📊 **Patient History Dashboard**
+- **Comprehensive Records**: Store and view all past analyses
+- **Advanced Search**: Filter by name, date, diagnosis, or location
+- **CSV Export**: Download complete history for records
+- **Detailed View**: Access full analysis with images and reports
 
-- 🏥 **AI-Powered Diagnosis**: Uses Roboflow-trained models to classify 7 types of skin lesions
-- 📸 **Multiple Input Methods**: Drag-and-drop file upload or live camera capture
-- 🤖 **Personalized Insights**: Groq LLM (OpenAI GPT-OSS-20B) provides tailored medical advice and precautions with beautifully formatted sections
-- 📍 **Location-Aware Care**: GPS location detection for personalized hospital recommendations
-- 🏥 **Nearest Hospital Finder**: AI-powered suggestions for local healthcare facilities
-- 📊 **Visual Analytics**: Interactive charts and confidence visualizations
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- 🔒 **Patient Privacy**: All processing happens locally (except LLM calls)
+### 📄 **Professional PDF Reports**
+- **Clean Formatting**: Properly rendered Markdown content
+- **Medical-Grade**: Professional layout suitable for healthcare
+- **Complete Information**: Patient data, diagnosis, images, and AI insights
+- **Print-Ready**: High-quality output for documentation
 
-## Skin Conditions Detected
+### 💻 **Modern User Interface**
+- **React + Vite**: Lightning-fast frontend performance
+- **Tailwind CSS**: Beautiful, responsive design
+- **Drag & Drop Upload**: Intuitive image upload
+- **Camera Capture**: Direct image capture from device
+- **Real-Time Analysis**: Instant feedback and results
 
-1. **Actinic keratoses** - Precancerous growths (Medium Risk)
-2. **Basal cell carcinoma** - Common skin cancer (High Risk)
-3. **Benign keratosis-like lesions** - Non-cancerous growths (Low Risk)
-4. **Dermatofibroma** - Benign skin growth (Low Risk)
-5. **Melanocytic nevi** - Common moles (Low Risk)
-6. **Melanoma** - Serious skin cancer (Very High Risk)
-7. **Vascular lesions** - Blood vessel lesions (Low Risk)
+## 🚀 Quick Start
 
-## Setup Instructions
+### Prerequisites
+- Python 3.9+
+- Node.js 16+
+- npm or yarn
 
-### 1. Install Dependencies
+### Installation
 
+1. **Clone the Repository**
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/priyanshu-3/SkinCancerDetection.git
+cd SkinCancerDetection
 ```
 
-### 2. Configure Environment Variables
+2. **Backend Setup**
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
 
-Edit the `.env` file with your API keys:
-
-```env
-# Roboflow API Key (from https://roboflow.com)
+# Create .env file with your API keys
+cat > .env << EOF
 ROBOFLOW_API_KEY=your-roboflow-api-key
-
-# Model details
 WORKSPACE=your-workspace-name
 PROJECT=your-project-name
-VERSION=your-model-version
-
-# Groq API Key (from https://console.groq.com/)
+VERSION=your-version
 GROQ_API_KEY=your-groq-api-key
-```
+PORT=5001
+SECRET_KEY=your-secret-key
+EOF
 
-### 3. Get API Keys
-
-#### Roboflow API Key:
-
-1. Go to [Roboflow](https://roboflow.com)
-2. Sign in to your account
-3. Go to Account Settings → API Keys
-4. Copy your Private API Key
-
-#### Groq API Key:
-
-1. Go to [Groq Console](https://console.groq.com/)
-2. Create an account or sign in
-3. Navigate to API Keys section
-4. Create a new API key
-5. Copy the key
-
-### 4. Run the Application
-
-```bash
+# Start Flask server
 python app.py
 ```
 
-The application will start on `http://localhost:5000`
+3. **Frontend Setup**
+```bash
+# Navigate to frontend directory
+cd frontend
 
-## Usage
+# Install dependencies
+npm install
 
-### Web Interface Features:
-
-1. **Patient Information Form**:
-
-   - Enter patient's full name, age, gender, and location
-   - All fields except location are required
-
-2. **Image Upload Options**:
-
-   - **File Upload**: Drag and drop images or click to browse
-   - **Camera Capture**: Use device camera for live capture
-
-3. **Analysis Results**:
-   - Primary diagnosis with confidence score
-   - Risk level assessment
-   - All model predictions ranked by confidence
-   - Personalized medical insights from AI
-   - Visual charts and analysis
-
-### Supported Image Formats:
-
-- JPG, JPEG, PNG
-- Maximum file size: 16MB
-
-## API Endpoints
-
-- `GET /` - Main web interface
-- `POST /analyze` - Analyze uploaded image
-- `POST /capture` - Handle camera capture
-
-## Medical Disclaimer
-
-⚠️ **IMPORTANT**: This application is for educational and informational purposes only. The AI predictions are not a substitute for professional medical advice, diagnosis, or treatment. Always consult qualified healthcare professionals for proper medical evaluation and care.
-
-## Technical Details
-
-### Backend:
-
-- **Flask** - Web framework
-- **Roboflow** - AI model inference
-- **Groq** - LLM for medical insights
-- **OpenCV & PIL** - Image processing
-- **Matplotlib** - Data visualization
-
-### Frontend:
-
-- **Bootstrap 5** - Responsive UI
-- **HTML5 Canvas** - Camera capture
-- **Drag & Drop API** - File uploads
-- **Fetch API** - AJAX requests
-
-### Security:
-
-- Client-side validation
-- Secure file uploads
-- CORS enabled
-- Input sanitization
-
-## Troubleshooting
-
-### Common Issues:
-
-1. **"Module not found" errors**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Camera not working**:
-
-   - Ensure HTTPS connection for camera access
-   - Grant camera permissions in browser
-   - Try different browser (Chrome recommended)
-
-3. **Model loading errors**:
-
-   - Verify Roboflow API key and model details
-   - Check internet connection
-   - Ensure model is publicly accessible
-
-4. **LLM response errors**:
-   - Verify Groq API key
-   - Check API quota/limits
-   - Ensure stable internet connection
-
-### Camera Capture Issues
-
-If the camera is not working, try these solutions:
-
-1. **Browser Permissions**: Allow camera access when prompted
-2. **HTTPS Requirement**: Modern browsers require HTTPS for camera access. For local development:
-   - Use `http://localhost:5000` or `http://127.0.0.1:5000`
-   - Avoid IP addresses like `http://192.168.x.x:5000`
-3. **Browser Compatibility**: Use Chrome, Firefox, or Edge (latest versions)
-4. **Multiple Cameras**: If you have multiple cameras, the app uses the front camera on mobile
-5. **Permissions Reset**: Clear browser permissions and try again
-6. **Console Debug**: Press F12 to open developer tools and check for errors
-
-**Quick Test**: Run `debug_camera.bat` for troubleshooting information.
-
-## Development
-
-### Project Structure:
-
-```
-skin-cancer-detection/
-├── app.py                 # Flask application
-├── main.py               # Command-line interface
-├── requirements.txt      # Python dependencies
-├── .env                  # Environment variables
-├── README.md            # Documentation
-├── templates/
-│   └── index.html       # Web interface
-└── static/
-    └── uploads/         # Uploaded images
+# Start development server
+npm run dev
 ```
 
-### Adding New Features:
+4. **Access the Application**
+- Backend: http://localhost:5001
+- Frontend: http://localhost:3000
 
-1. **New skin conditions**: Update `CONDITION_INFO` in `app.py`
-2. **Additional input methods**: Extend the upload/capture functionality
-3. **Enhanced UI**: Modify `templates/index.html`
-4. **New API endpoints**: Add routes in `app.py`
+## 📋 API Keys Required
 
-## License
+### Roboflow API Key
+1. Go to [Roboflow](https://roboflow.com)
+2. Sign in and navigate to Settings → API Keys
+3. Copy your Private API Key
 
-This project is for educational purposes. Please ensure compliance with medical regulations and data privacy laws when deploying.
+### Groq API Key
+1. Go to [Groq Console](https://console.groq.com/)
+2. Create an account and navigate to API Keys
+3. Create and copy your API key
 
-## Contributing
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    React Frontend                        │
+│  (Vite, Tailwind CSS, React Router, Lucide Icons)      │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     │ HTTP/REST API
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│                   Flask Backend                          │
+│  • User Authentication (Flask-Login)                     │
+│  • Image Processing (PIL, OpenCV)                        │
+│  • Database (SQLAlchemy + SQLite)                        │
+│  • PDF Generation (ReportLab)                            │
+└────────┬──────────┬──────────┬──────────────────────────┘
+         │          │          │
+         │          │          │
+    ┌────▼──┐  ┌────▼────┐  ┌─▼────────┐
+    │Roboflow│  │ Groq    │  │ XGBoost  │
+    │  API   │  │  LLM    │  │ Ensemble │
+    └────────┘  └─────────┘  └──────────┘
+```
+
+## 📦 Tech Stack
+
+### Backend
+- **Framework**: Flask 3.1+
+- **ML/AI**: 
+  - Roboflow (Computer Vision)
+  - XGBoost (Ensemble Learning)
+  - Groq (Large Language Model)
+  - scikit-learn, LIME, SHAP (XAI)
+- **Database**: SQLAlchemy + SQLite
+- **Image Processing**: PIL, OpenCV
+- **PDF Generation**: ReportLab
+- **Authentication**: Flask-Login
+
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite 5
+- **Styling**: Tailwind CSS 3
+- **Icons**: Lucide React
+- **HTTP Client**: Fetch API
+- **Routing**: React Router
+
+## 🎯 Skin Conditions Detected
+
+1. **Melanoma** - Serious skin cancer (Very High Risk) 🔴
+2. **Basal Cell Carcinoma** - Common skin cancer (High Risk) 🟠
+3. **Actinic Keratoses** - Precancerous growths (Medium Risk) 🟡
+4. **Melanocytic Nevi** - Common moles (Low Risk) 🟢
+5. **Benign Keratosis-like Lesions** - Non-cancerous (Low Risk) 🟢
+6. **Dermatofibroma** - Benign skin growth (Low Risk) 🟢
+7. **Vascular Lesions** - Blood vessel lesions (Low Risk) 🟢
+
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Analysis Results
+![Analysis](screenshots/analysis.png)
+
+### Patient History
+![History](screenshots/history.png)
+
+### PDF Report
+![Report](screenshots/report.png)
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+# Roboflow Configuration
+ROBOFLOW_API_KEY=your-api-key
+WORKSPACE=your-workspace
+PROJECT=your-project
+VERSION=1
+
+# Groq LLM Configuration
+GROQ_API_KEY=your-groq-key
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=5001
+DEBUG=true
+
+# Database
+DATABASE_URL=sqlite:///skin_cancer.db
+
+# Security
+SECRET_KEY=your-secret-key-here
+```
+
+## 📖 Documentation
+
+- [**Full Setup Guide**](FULLSTACK_SETUP.md) - Complete installation instructions
+- [**Patient History Feature**](PATIENT_HISTORY_FEATURE.md) - History dashboard documentation
+- [**PDF Fixes**](PDF_MARKDOWN_FIX.md) - PDF rendering improvements
+- [**Unicode Fix**](UNICODE_BLACK_BOX_FIX.md) - Character encoding solutions
+- [**XGBoost XAI**](XGBOOST_XAI_README.md) - Explainable AI documentation
+- [**Architecture Comparison**](ARCHITECTURE_COMPARISON.md) - System design details
+
+## 🔐 Security Features
+
+- ✅ User authentication with password hashing
+- ✅ Session management with Flask-Login
+- ✅ CORS protection
+- ✅ SQL injection prevention (parameterized queries)
+- ✅ File upload validation
+- ✅ Secure API key management
+- ✅ User data isolation
+
+## 🧪 Testing
+
+```bash
+# Backend tests
+python -m pytest tests/
+
+# Frontend tests
+cd frontend && npm test
+
+# Linting
+pylint app.py
+cd frontend && npm run lint
+```
+
+## 📊 Performance
+
+- **Analysis Time**: 3-10 seconds per image
+- **Accuracy**: Based on Roboflow model performance
+- **Concurrent Users**: Supports multiple simultaneous analyses
+- **Database**: Optimized queries with indexing
+- **Frontend**: < 1s load time with Vite HMR
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Support
+## ⚠️ Medical Disclaimer
 
-For technical issues or questions:
+**IMPORTANT**: This application is for **educational and informational purposes only**. The AI predictions are **NOT a substitute** for professional medical advice, diagnosis, or treatment. Always consult qualified healthcare professionals for proper medical evaluation and care.
 
-- Check the troubleshooting section above
-- Review the code comments for implementation details
-- Ensure all dependencies are properly installed
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- **Priyanshu Mehra** - [GitHub Profile](https://github.com/priyanshu-3)
+
+## 🙏 Acknowledgments
+
+- **Roboflow** for computer vision API
+- **Groq** for LLM API
+- **Flask & React** communities
+- **Open Source Contributors**
+
+## 📞 Support
+
+For issues, questions, or suggestions:
+- **GitHub Issues**: [Create an issue](https://github.com/priyanshu-3/SkinCancerDetection/issues)
+- **Email**: Contact through GitHub profile
+
+## 🔄 Updates
+
+### Latest Version (2025-10-26)
+- ✅ Patient history dashboard with search and filter
+- ✅ CSV export functionality
+- ✅ Fixed PDF Markdown rendering
+- ✅ Removed Unicode black box characters
+- ✅ Enhanced database models
+- ✅ Improved error handling
+- ✅ Better documentation
+
+## 🌐 Links
+
+- **Repository**: https://github.com/priyanshu-3/SkinCancerDetection
+- **Documentation**: See `/docs` folder
+- **Demo**: Coming soon
 
 ---
 
-**Remember**: This tool provides AI-assisted analysis but should never replace professional medical consultation. Always seek advice from qualified healthcare providers for medical concerns.
+**Built with ❤️ using AI and modern web technologies**
+
+*Last Updated: October 26, 2025*
+
