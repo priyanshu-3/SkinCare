@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Database
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (uploaded images)
+static/uploads/*.jpeg
+static/uploads/*.jpg
+static/uploads/*.png
+
+# Demo outputs
+demo_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application logs and PIDs
+*.log
+*.pid
+
+# Generated models (can be large)
+models/*.pkl
+
+# Generated explanations/visualizations
+explanations/*.png
+explanations/*.jpg
+
+# Result visualizations
+result_visualization.png
+
+# Frontend (React/Node)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
