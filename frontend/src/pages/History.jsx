@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Sidebar from '../components/Sidebar'
 import { 
   Search, 
   Download, 
@@ -9,10 +10,12 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
-  Loader
+  Loader,
+  History as HistoryIcon
 } from 'lucide-react'
 
 export default function History() {
+  const [collapsed, setCollapsed] = useState(false)
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -152,61 +155,58 @@ export default function History() {
   const uniqueDiagnoses = [...new Set(history.map(h => h.diagnosis))]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <a
-                  href="/dashboard"
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Back to Dashboard
-                </a>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900">Patient History</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                View and manage all patient analysis records
-              </p>
-            </div>
-            <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-          </div>
-
-          {/* Statistics Cards */}
-          {stats && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="text-sm text-blue-600 font-medium">Total Analyses</div>
-                <div className="text-2xl font-bold text-blue-900 mt-1">{stats.total_analyses}</div>
-              </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="text-sm text-green-600 font-medium">Avg Confidence</div>
-                <div className="text-2xl font-bold text-green-900 mt-1">{(stats.avg_confidence * 100).toFixed(1)}%</div>
-              </div>
-              <div className="bg-purple-50 rounded-lg p-4">
-                <div className="text-sm text-purple-600 font-medium">Latest Analysis</div>
-                <div className="text-lg font-bold text-purple-900 mt-1">
-                  {stats.latest_date ? new Date(stats.latest_date).toLocaleDateString() : 'N/A'}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}>
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <HistoryIcon className="w-7 h-7 text-blue-600" />
+                  Patient History
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  View and manage all patient analysis records
+                </p>
+              </div>
+              <button
+                onClick={handleExportCSV}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
+
+            {/* Statistics Cards */}
+            {stats && (
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                  <div className="text-sm text-blue-600 font-medium">Total Analyses</div>
+                  <div className="text-2xl font-bold text-blue-900 mt-1">{stats.total_analyses}</div>
+                </div>
+              <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                <div className="text-sm text-green-600 font-medium">Avg Confidence</div>
+                <div className="text-2xl font-bold text-green-900 mt-1">{stats.avg_confidence.toFixed(1)}%</div>
+              </div>
+                <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                  <div className="text-sm text-purple-600 font-medium">Latest Analysis</div>
+                  <div className="text-lg font-bold text-purple-900 mt-1">
+                    {stats.latest_date ? new Date(stats.latest_date).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="p-8 overflow-y-auto h-[calc(100vh-200px)]">
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex flex-col gap-4">
@@ -362,7 +362,7 @@ export default function History() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{(record.confidence * 100).toFixed(1)}%</div>
+                        <div className="text-sm text-gray-900">{record.confidence.toFixed(1)}%</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{new Date(record.created_at).toLocaleString()}</div>
@@ -390,6 +390,7 @@ export default function History() {
             Showing {history.length} record{history.length !== 1 ? 's' : ''}
           </div>
         )}
+        </div>
       </div>
 
       {/* Detail Modal */}
@@ -432,7 +433,7 @@ export default function History() {
                         {selectedRecord.diagnosis}
                       </span>
                     </div>
-                    <div><span className="font-medium">Confidence:</span> {(selectedRecord.confidence * 100).toFixed(2)}%</div>
+                    <div><span className="font-medium">Confidence:</span> {selectedRecord.confidence.toFixed(2)}%</div>
                   </div>
                 </div>
 
@@ -471,7 +472,7 @@ export default function History() {
                       {selectedRecord.all_predictions.map((pred, idx) => (
                         <div key={idx} className="flex justify-between items-center bg-gray-50 rounded p-2">
                           <span className="text-sm">{pred.class}</span>
-                          <span className="text-sm font-medium">{(pred.confidence * 100).toFixed(2)}%</span>
+                          <span className="text-sm font-medium">{pred.confidence.toFixed(2)}%</span>
                         </div>
                       ))}
                     </div>
