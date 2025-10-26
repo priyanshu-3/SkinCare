@@ -412,7 +412,7 @@ CONDITION_INFO = {
 
 def analyze_with_llm(name, age, gender, prediction, confidence, location="Unknown", latitude=None, longitude=None):
     """
-    Get medical advice and hospital recommendations from Groq LLM
+    Get medical advice and insights from Groq LLM
     """
     try:
         condition_info = CONDITION_INFO.get(prediction, {})
@@ -448,17 +448,6 @@ def analyze_with_llm(name, age, gender, prediction, confidence, location="Unknow
         ## ⚠️ Important Precautions
         - Bullet points of general precautions and next steps
         - Emphasize seeing a doctor
-
-        ## 🏥 Recommended Medical Care
-        - Suggested hospital/clinic types for this condition
-        - Specialist recommendations
-
-        ## 🗺️ Nearest Hospital Recommendations
-        Based on the patient's location ({location}), recommend:
-        - 2-3 specific hospital types or names in that area
-        - How to find them (search terms, directions)
-        - What to expect when calling or visiting
-        - Any local healthcare resources or hotlines
 
         ## 🚨 When to Seek Immediate Attention
         - Clear signs that require immediate medical care
