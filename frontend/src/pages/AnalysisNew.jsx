@@ -26,6 +26,13 @@ export default function AnalysisNew() {
     location: ''
   })
 
+  // GPS location state
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [detectedLocation, setDetectedLocation] = useState('')
+  const [lastCoords, setLastCoords] = useState(null)
+  const [rawReverse, setRawReverse] = useState(null)
+  const [showGpsDebug, setShowGpsDebug] = useState(false)
+
   // Handle video stream setup
   useEffect(() => {
     if (stream && videoRef.current && !videoRef.current.srcObject) {
@@ -176,6 +183,107 @@ export default function AnalysisNew() {
     }
   }
 
+  // GPS location functions
+  const useGPS = async () => {
+    setGpsLoading(true)
+    setDetectedLocation('')
+    try {
+      if (!navigator.geolocation) {
+        setError('Your browser does not support geolocation.')
+        setGpsLoading(false)
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude
+          const lon = position.coords.longitude
+          setLastCoords({ lat, lon, accuracy: position.coords.accuracy })
+
+          try {
+            // Reverse geocode using OpenStreetMap Nominatim
+            const resp = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1&accept-language=en`,
+              { headers: { Accept: 'application/json' } }
+            )
+            const data = await resp.json()
+            setRawReverse(data)
+            const addr = data.address || {}
+
+            // Prefer the most useful locality fields (city/town/village)
+            const primaryLocality = addr.city || addr.town || addr.village || addr.municipality || addr.county || ''
+            const smallLocality = addr.hamlet || addr.suburb || addr.neighbourhood || addr.road || ''
+            const state = addr.state || addr.state_district || addr.region || ''
+            const country = addr.country || ''
+
+            // Build candidate parts
+            const parts = []
+            if (primaryLocality) parts.push(primaryLocality)
+            if (state && state !== primaryLocality) parts.push(state)
+            if (country) parts.push(country)
+
+            let locText = parts.filter(Boolean).join(', ')
+
+            // Heuristic: if primaryLocality is missing or is a small locality
+            if ((!primaryLocality || smallLocality) && data.display_name) {
+              const comps = data.display_name.split(',').map(s => s.trim()).filter(Boolean)
+              if (comps.length >= 2) {
+                const candidate = comps[1]
+                if (candidate && candidate !== comps[0]) {
+                  const candidateParts = [candidate]
+                  if (comps.length >= 3) candidateParts.push(comps[2])
+                  if (comps.length >= 4) candidateParts.push(comps[3])
+                  locText = candidateParts.slice(0, 3).join(', ')
+                }
+              }
+            }
+
+            // Final fallback to display_name or lat/lon
+            if (!locText && data.display_name) {
+              locText = data.display_name.split(',').slice(0, 3).map(s => s.trim()).join(', ')
+            }
+            if (!locText) {
+              locText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+            }
+
+            setPatientInfo((p) => ({ ...p, location: locText }))
+            setDetectedLocation(locText)
+          } catch (err) {
+            // fallback to lat,lon string
+            const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+            setPatientInfo((p) => ({ ...p, location: fallback }))
+            setDetectedLocation(fallback)
+          } finally {
+            setGpsLoading(false)
+          }
+        },
+        (err) => {
+          setGpsLoading(false)
+          let errorMessage = 'Unable to retrieve your location. '
+          if (err.code === err.PERMISSION_DENIED) {
+            errorMessage += 'Please enable location permissions and try again.'
+          } else if (err.code === err.POSITION_UNAVAILABLE) {
+            errorMessage += 'Location information is unavailable.'
+          } else if (err.code === err.TIMEOUT) {
+            errorMessage += 'Location request timed out.'
+          } else {
+            errorMessage += 'Please try again.'
+          }
+          setError(errorMessage)
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      )
+    } catch (err) {
+      setGpsLoading(false)
+      setError('GPS error: ' + err.message)
+    }
+  }
+
+  const clearDetected = () => {
+    setDetectedLocation('')
+    setPatientInfo((p) => ({ ...p, location: '' }))
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -273,13 +381,38 @@ export default function AnalysisNew() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Location
                       </label>
-                      <input
-                        type="text"
-                        value={patientInfo.location}
-                        onChange={(e) => setPatientInfo({ ...patientInfo, location: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="City, State"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={patientInfo.location}
+                          onChange={(e) => setPatientInfo({ ...patientInfo, location: e.target.value })}
+                          className="w-full pr-12 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="City, State or use GPS"
+                        />
+                        <button
+                          type="button"
+                          onClick={useGPS}
+                          disabled={gpsLoading}
+                          title="Use GPS to detect location"
+                          className="absolute right-1 top-1/2 transform -translate-y-1/2 p-2 bg-white border border-gray-200 rounded-md text-blue-600 hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                          aria-label="Use GPS"
+                        >
+                          {gpsLoading ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <MapPin className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                      {detectedLocation && (
+                        <p className="text-green-600 text-sm mt-2">
+                          Location detected: {detectedLocation}
+                          <button onClick={clearDetected} className="ml-2 text-blue-600 underline text-xs">
+                            Clear
+                          </button>
+                        </p>
+                      )}
+                      <small className="text-gray-500 block mt-1">Click GPS button to auto-detect location</small>
                     </div>
                   </div>
                 </div>
