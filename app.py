@@ -23,7 +23,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -309,6 +309,8 @@ class Analysis(db.Model):
     
     def to_dict(self):
         """Convert analysis record to dictionary"""
+        # Convert UTC to IST (UTC + 5:30) for display
+        ist_time = self.created_at + timedelta(hours=5, minutes=30)
         return {
             'id': self.id,
             'patient_name': self.patient_name,
@@ -322,7 +324,7 @@ class Analysis(db.Model):
             'report_path': self.report_path,
             'all_predictions': json.loads(self.all_predictions) if self.all_predictions else [],
             'llm_advice': self.llm_advice,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': ist_time.strftime('%Y-%m-%d %H:%M:%S')
         }
 
 
@@ -802,7 +804,9 @@ def analyze():
                 c.drawString(margin, y, 'Skin Cancer Analysis Report')
                 c.setFont('Helvetica', 10)
                 c.setFillColor(colors.gray)
-                c.drawRightString(width - margin, y, f'Generated: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}')
+                # Convert UTC to IST (UTC + 5:30)
+                ist_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
+                c.drawRightString(width - margin, y, f'Generated: {ist_time.strftime("%Y-%m-%d %H:%M IST")}')
                 c.setFillColor(colors.black)
                 y -= 12 * mm
 
@@ -884,7 +888,8 @@ def analyze():
                 # Footer: date/time and doctor signature
                 footer_y = 25 * mm
                 c.setFont('Helvetica', 9)
-                c.drawString(margin, footer_y + 10 * mm, f'Report generated: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}')
+                # Use IST time for footer as well
+                c.drawString(margin, footer_y + 10 * mm, f'Report generated: {ist_time.strftime("%Y-%m-%d %H:%M IST")}')
 
                 # Doctor signature block
                 sig_path = os.path.join(app.config['UPLOAD_FOLDER'], 'doctor_signature.png')
@@ -1184,6 +1189,8 @@ def export_history_csv():
         
         # Write data rows
         for analysis in analyses:
+            # Convert UTC to IST (UTC + 5:30) for CSV export
+            ist_time = analysis.created_at + timedelta(hours=5, minutes=30)
             writer.writerow([
                 analysis.id,
                 analysis.patient_name,
@@ -1192,7 +1199,7 @@ def export_history_csv():
                 analysis.location or 'N/A',
                 analysis.diagnosis,
                 f"{analysis.confidence * 100:.2f}",
-                analysis.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ist_time.strftime('%Y-%m-%d %H:%M:%S')
             ])
         
         # Create response
@@ -1235,7 +1242,10 @@ def get_history_stats():
             diagnosis_breakdown[analysis.diagnosis] = diagnosis_breakdown.get(analysis.diagnosis, 0) + 1
             confidence_sum += analysis.confidence
         
-        latest_date = max(a.created_at for a in analyses).strftime('%Y-%m-%d %H:%M:%S')
+        # Convert latest date to IST
+        latest_utc = max(a.created_at for a in analyses)
+        latest_ist = latest_utc + timedelta(hours=5, minutes=30)
+        latest_date = latest_ist.strftime('%Y-%m-%d %H:%M:%S')
         
         return jsonify({
             'success': True,
