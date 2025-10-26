@@ -309,6 +309,8 @@ class Analysis(db.Model):
     
     def to_dict(self):
         """Convert analysis record to dictionary"""
+        # Convert UTC to IST (UTC + 5:30) for display
+        ist_time = self.created_at + timedelta(hours=5, minutes=30)
         return {
             'id': self.id,
             'patient_name': self.patient_name,
@@ -322,7 +324,7 @@ class Analysis(db.Model):
             'report_path': self.report_path,
             'all_predictions': json.loads(self.all_predictions) if self.all_predictions else [],
             'llm_advice': self.llm_advice,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': ist_time.strftime('%Y-%m-%d %H:%M:%S')
         }
 
 
