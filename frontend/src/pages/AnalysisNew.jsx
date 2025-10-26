@@ -257,20 +257,20 @@ export default function AnalysisNew() {
             setGpsLoading(false)
           }
         },
-        (err) => {
-          setGpsLoading(false)
-          let errorMessage = 'Unable to retrieve your location. '
-          if (err.code === err.PERMISSION_DENIED) {
-            errorMessage += 'Please enable location permissions and try again.'
-          } else if (err.code === err.POSITION_UNAVAILABLE) {
-            errorMessage += 'Location information is unavailable.'
-          } else if (err.code === err.TIMEOUT) {
-            errorMessage += 'Location request timed out.'
-          } else {
-            errorMessage += 'Please try again.'
-          }
-          setError(errorMessage)
-        },
+            (err) => {
+              setGpsLoading(false)
+              let errorMessage = 'Unable to retrieve your location. '
+              if (err.code === err.PERMISSION_DENIED) {
+                errorMessage += 'Please enable location permissions and try again.'
+              } else if (err.code === err.POSITION_UNAVAILABLE) {
+                errorMessage += 'Location information is unavailable. You can still enter location manually.'
+              } else if (err.code === err.TIMEOUT) {
+                errorMessage += 'Location request timed out. Please try again or enter manually.'
+              } else {
+                errorMessage += 'Please try again or enter location manually.'
+              }
+              setError(errorMessage)
+            },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       )
     } catch (err) {
@@ -282,6 +282,12 @@ export default function AnalysisNew() {
   const clearDetected = () => {
     setDetectedLocation('')
     setPatientInfo((p) => ({ ...p, location: '' }))
+  }
+
+  // Test location for development
+  const useTestLocation = () => {
+    setPatientInfo((p) => ({ ...p, location: 'Mumbai, Maharashtra, India' }))
+    setDetectedLocation('Mumbai, Maharashtra, India')
   }
 
   return (
@@ -381,29 +387,48 @@ export default function AnalysisNew() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Location
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={patientInfo.location}
-                          onChange={(e) => setPatientInfo({ ...patientInfo, location: e.target.value })}
-                          className="w-full pr-12 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="City, State or use GPS"
-                        />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={patientInfo.location}
+                        onChange={(e) => setPatientInfo({ ...patientInfo, location: e.target.value })}
+                        className="w-full pr-12 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="City, State or use GPS"
+                      />
+                      <button
+                        type="button"
+                        onClick={useGPS}
+                        disabled={gpsLoading}
+                        title="Use GPS to detect location"
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 p-2 bg-white border border-gray-200 rounded-md text-blue-600 hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                        aria-label="Use GPS"
+                      >
+                        {gpsLoading ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <MapPin className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {/* Test location button for development */}
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={useTestLocation}
+                        className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        Test Location (Dev)
+                      </button>
+                      {detectedLocation && (
                         <button
                           type="button"
-                          onClick={useGPS}
-                          disabled={gpsLoading}
-                          title="Use GPS to detect location"
-                          className="absolute right-1 top-1/2 transform -translate-y-1/2 p-2 bg-white border border-gray-200 rounded-md text-blue-600 hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed"
-                          aria-label="Use GPS"
+                          onClick={clearDetected}
+                          className="px-3 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
                         >
-                          {gpsLoading ? (
-                            <Loader className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <MapPin className="w-4 h-4" />
-                          )}
+                          Clear
                         </button>
-                      </div>
+                      )}
+                    </div>
                       {detectedLocation && (
                         <p className="text-green-600 text-sm mt-2">
                           Location detected: {detectedLocation}
