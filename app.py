@@ -1189,6 +1189,8 @@ def export_history_csv():
         
         # Write data rows
         for analysis in analyses:
+            # Convert UTC to IST (UTC + 5:30) for CSV export
+            ist_time = analysis.created_at + timedelta(hours=5, minutes=30)
             writer.writerow([
                 analysis.id,
                 analysis.patient_name,
@@ -1197,7 +1199,7 @@ def export_history_csv():
                 analysis.location or 'N/A',
                 analysis.diagnosis,
                 f"{analysis.confidence * 100:.2f}",
-                analysis.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ist_time.strftime('%Y-%m-%d %H:%M:%S')
             ])
         
         # Create response
@@ -1240,7 +1242,10 @@ def get_history_stats():
             diagnosis_breakdown[analysis.diagnosis] = diagnosis_breakdown.get(analysis.diagnosis, 0) + 1
             confidence_sum += analysis.confidence
         
-        latest_date = max(a.created_at for a in analyses).strftime('%Y-%m-%d %H:%M:%S')
+        # Convert latest date to IST
+        latest_utc = max(a.created_at for a in analyses)
+        latest_ist = latest_utc + timedelta(hours=5, minutes=30)
+        latest_date = latest_ist.strftime('%Y-%m-%d %H:%M:%S')
         
         return jsonify({
             'success': True,
