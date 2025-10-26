@@ -187,9 +187,15 @@ export default function AnalysisNew() {
   const useGPS = async () => {
     setGpsLoading(true)
     setDetectedLocation('')
+    setError('') // Clear any existing errors
+    
     try {
+      // First try IP-based geolocation (works on HTTP)
+      await useIPGeolocation()
+    } catch (ipError) {
+      // Fallback to GPS if IP geolocation fails
       if (!navigator.geolocation) {
-        setError('Your browser does not support geolocation.')
+        setError('Location services not available. Please enter location manually or use Test Location.')
         setGpsLoading(false)
         return
       }
@@ -257,25 +263,55 @@ export default function AnalysisNew() {
             setGpsLoading(false)
           }
         },
-            (err) => {
-              setGpsLoading(false)
-              let errorMessage = 'Unable to retrieve your location. '
-              if (err.code === err.PERMISSION_DENIED) {
-                errorMessage += 'Please enable location permissions and try again.'
-              } else if (err.code === err.POSITION_UNAVAILABLE) {
-                errorMessage += 'Location information is unavailable. You can still enter location manually.'
-              } else if (err.code === err.TIMEOUT) {
-                errorMessage += 'Location request timed out. Please try again or enter manually.'
-              } else {
-                errorMessage += 'Please try again or enter location manually.'
-              }
-              setError(errorMessage)
-            },
+        (err) => {
+          setGpsLoading(false)
+          let errorMessage = 'Unable to retrieve your location. '
+          if (err.code === err.PERMISSION_DENIED) {
+            errorMessage += 'Please enable location permissions and try again.'
+          } else if (err.code === err.POSITION_UNAVAILABLE) {
+            errorMessage += 'Location information is unavailable. You can still enter location manually.'
+          } else if (err.code === err.TIMEOUT) {
+            errorMessage += 'Location request timed out. Please try again or enter manually.'
+          } else {
+            errorMessage += 'Please try again or enter location manually.'
+          }
+          setError(errorMessage)
+        },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       )
-    } catch (err) {
-      setGpsLoading(false)
-      setError('GPS error: ' + err.message)
+    }
+  }
+
+  // IP-based geolocation (works on HTTP)
+  const useIPGeolocation = async () => {
+    try {
+      // Use ipapi.co for IP-based geolocation
+      const response = await fetch('https://ipapi.co/json/')
+      const data = await response.json()
+      
+      if (data.error) {
+        throw new Error(data.reason || 'IP geolocation failed')
+      }
+      
+      // Build location string from IP data
+      const parts = []
+      if (data.city) parts.push(data.city)
+      if (data.region) parts.push(data.region)
+      if (data.country_name) parts.push(data.country_name)
+      
+      const locText = parts.filter(Boolean).join(', ')
+      
+      if (locText) {
+        setPatientInfo((p) => ({ ...p, location: locText }))
+        setDetectedLocation(locText)
+        setGpsLoading(false)
+        return
+      } else {
+        throw new Error('No location data available')
+      }
+    } catch (error) {
+      // If IP geolocation fails, throw error to trigger GPS fallback
+      throw error
     }
   }
 
@@ -411,14 +447,22 @@ export default function AnalysisNew() {
                         )}
                       </button>
                     </div>
-                    {/* Test location button for development */}
-                    <div className="mt-2 flex gap-2">
+                    {/* Location buttons for development */}
+                    <div className="mt-2 flex gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={useIPGeolocation}
+                        className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                        title="Use IP-based location (works on HTTP)"
+                      >
+                        🌐 IP Location
+                      </button>
                       <button
                         type="button"
                         onClick={useTestLocation}
                         className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
                       >
-                        Test Location (Dev)
+                        🧪 Test Location
                       </button>
                       {detectedLocation && (
                         <button
@@ -426,7 +470,7 @@ export default function AnalysisNew() {
                           onClick={clearDetected}
                           className="px-3 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
                         >
-                          Clear
+                          🗑️ Clear
                         </button>
                       )}
                     </div>
