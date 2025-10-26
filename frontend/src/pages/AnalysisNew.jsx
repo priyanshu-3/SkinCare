@@ -320,12 +320,6 @@ export default function AnalysisNew() {
     setPatientInfo((p) => ({ ...p, location: '' }))
   }
 
-  // Test location for development
-  const useTestLocation = () => {
-    setPatientInfo((p) => ({ ...p, location: 'Mumbai, Maharashtra, India' }))
-    setDetectedLocation('Mumbai, Maharashtra, India')
-    setError('') // Clear any existing errors
-  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -456,13 +450,6 @@ export default function AnalysisNew() {
                         title="Use IP-based location (works on HTTP)"
                       >
                         🌐 IP Location
-                      </button>
-                      <button
-                        type="button"
-                        onClick={useTestLocation}
-                        className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
-                      >
-                        🧪 Test Location
                       </button>
                       {detectedLocation && (
                         <button
