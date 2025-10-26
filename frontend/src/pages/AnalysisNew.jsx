@@ -288,6 +288,7 @@ export default function AnalysisNew() {
   const useTestLocation = () => {
     setPatientInfo((p) => ({ ...p, location: 'Mumbai, Maharashtra, India' }))
     setDetectedLocation('Mumbai, Maharashtra, India')
+    setError('') // Clear any existing errors
   }
 
   return (
@@ -314,7 +315,7 @@ export default function AnalysisNew() {
                   <h4 className="font-semibold text-red-900">Error</h4>
                   <p className="text-sm text-red-700">{error}</p>
                 </div>
-                <button onClick={() => setError(null)} className="text-red-600 hover:text-red-700">
+                <button onClick={() => setError('')} className="text-red-600 hover:text-red-700">
                   <X className="w-5 h-5" />
                 </button>
               </div>
