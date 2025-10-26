@@ -23,7 +23,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -802,7 +802,9 @@ def analyze():
                 c.drawString(margin, y, 'Skin Cancer Analysis Report')
                 c.setFont('Helvetica', 10)
                 c.setFillColor(colors.gray)
-                c.drawRightString(width - margin, y, f'Generated: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}')
+                # Convert UTC to IST (UTC + 5:30)
+                ist_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
+                c.drawRightString(width - margin, y, f'Generated: {ist_time.strftime("%Y-%m-%d %H:%M IST")}')
                 c.setFillColor(colors.black)
                 y -= 12 * mm
 
@@ -884,7 +886,8 @@ def analyze():
                 # Footer: date/time and doctor signature
                 footer_y = 25 * mm
                 c.setFont('Helvetica', 9)
-                c.drawString(margin, footer_y + 10 * mm, f'Report generated: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}')
+                # Use IST time for footer as well
+                c.drawString(margin, footer_y + 10 * mm, f'Report generated: {ist_time.strftime("%Y-%m-%d %H:%M IST")}')
 
                 # Doctor signature block
                 sig_path = os.path.join(app.config['UPLOAD_FOLDER'], 'doctor_signature.png')
