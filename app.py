@@ -443,17 +443,11 @@ def analyze_with_llm(name, age, gender, prediction, confidence, location="Unknow
         Please provide a well-formatted response using markdown with these sections:
 
         ## 📋 Condition Overview
-        Brief explanation of what this condition means
+        Brief explanation of what this condition means and its characteristics
 
         ## ⚠️ Important Precautions
         - Bullet points of general precautions and next steps
-        - Emphasize seeing a doctor
-
-        ## 🚨 When to Seek Immediate Attention
-        - Clear signs that require immediate medical care
-
-        ## 💝 Supportive Message
-        A compassionate closing message
+        - Emphasize seeing a healthcare professional for proper diagnosis
 
         Format the response with clear headings, bullet points, and professional medical language.
         Always stress that this is not a substitute for professional medical advice.
