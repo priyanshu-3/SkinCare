@@ -149,7 +149,10 @@ export default function PatientDashboard() {
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <div className="space-y-2">
-            <div className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer">
+            <div 
+              onClick={() => navigate('/patient-history')}
+              className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer"
+            >
               <History className="w-5 h-5 mr-3" />
               <span>History</span>
             </div>
