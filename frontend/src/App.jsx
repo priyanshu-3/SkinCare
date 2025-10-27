@@ -10,10 +10,11 @@ import PatientLogin from './pages/PatientLogin'
 import PatientRegister from './pages/PatientRegister'
 import PatientDashboard from './pages/PatientDashboard'
 import PatientHistory from './pages/PatientHistory'
+import AnalysisDetail from './pages/AnalysisDetail'
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen">
         <Routes>
           {/* Admin Routes */}
@@ -23,6 +24,7 @@ function App() {
           <Route path="/dashboard-old" element={<Dashboard />} />
           <Route path="/dashboard" element={<DashboardNew />} />
           <Route path="/analysis" element={<AnalysisNew />} />
+          <Route path="/analysis-detail/:id" element={<AnalysisDetail />} />
           <Route path="/history" element={<History />} />
           <Route path="/analytics" element={<DashboardNew />} />
           <Route path="/patients" element={<History />} />

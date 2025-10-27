@@ -740,28 +740,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slide-down {
-          from {
-            opacity: 0;
-            transform: translateY(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease;
-        }
-        .animate-slide-down {
-          animation: slide-down 0.3s ease;
-        }
-      `}</style>
     </div>
   )
 }
