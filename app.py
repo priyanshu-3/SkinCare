@@ -1458,6 +1458,7 @@ def get_patient_history():
 # @login_required  # Temporarily disabled for testing
 def get_analysis_detail(analysis_id):
     """Get detailed information for a specific analysis"""
+    print(f"DEBUG: Received request for analysis ID: {analysis_id}")
     try:
         # Build query based on user type
         if hasattr(current_user, 'username') and not current_user.is_anonymous:  # It's a patient
@@ -1474,7 +1475,12 @@ def get_analysis_detail(analysis_id):
             # No authentication, just get the analysis by ID
             analysis = Analysis.query.filter_by(id=analysis_id).first()
         
+        print(f"DEBUG: Found analysis: {analysis is not None}")
+        if analysis:
+            print(f"DEBUG: Analysis details - ID: {analysis.id}, Patient: {analysis.patient_name}")
+        
         if not analysis:
+            print(f"DEBUG: Analysis not found for ID: {analysis_id}")
             return jsonify({'error': 'Analysis not found'}), 404
         
         return jsonify({
