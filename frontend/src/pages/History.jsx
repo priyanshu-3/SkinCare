@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import { 
   Search, 
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react'
 
 export default function History() {
+  const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,6 +29,36 @@ export default function History() {
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [stats, setStats] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // Check authentication status
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/history/stats', {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        setIsAuthenticated(true)
+        return true
+      } else if (response.status === 401 || response.status === 403) {
+        setIsAuthenticated(false)
+        return false
+      } else {
+        // Check if response is HTML (redirect to login)
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('text/html')) {
+          setIsAuthenticated(false)
+          return false
+        }
+        setIsAuthenticated(true)
+        return true
+      }
+    } catch (err) {
+      setIsAuthenticated(false)
+      return false
+    }
+  }
 
   // Fetch history data
   const fetchHistory = async () => {
@@ -46,6 +78,9 @@ export default function History() {
       })
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication required. Please log in.')
+        }
         throw new Error('Failed to fetch history')
       }
       
@@ -68,16 +103,31 @@ export default function History() {
       if (response.ok) {
         const data = await response.json()
         setStats(data.stats)
+      } else if (response.status === 401 || response.status === 403) {
+        console.log('Authentication required for stats')
+        setIsAuthenticated(false)
+      } else {
+        console.error('Failed to fetch stats:', response.status)
       }
     } catch (err) {
       console.error('Failed to fetch stats:', err)
+      setIsAuthenticated(false)
     }
   }
 
   // Load data on mount
   useEffect(() => {
-    fetchHistory()
-    fetchStats()
+    const loadData = async () => {
+      const authStatus = await checkAuth()
+      if (authStatus) {
+        fetchHistory()
+        fetchStats()
+      } else {
+        setError('Authentication required. Please log in to view history.')
+        setLoading(false)
+      }
+    }
+    loadData()
   }, [])
 
   // Handle search/filter
@@ -102,6 +152,9 @@ export default function History() {
       })
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication required. Please log in.')
+        }
         throw new Error('Failed to export CSV')
       }
       
@@ -127,6 +180,9 @@ export default function History() {
       })
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication required. Please log in.')
+        }
         throw new Error('Failed to fetch details')
       }
       
@@ -153,6 +209,33 @@ export default function History() {
 
   // Get unique diagnoses for filter
   const uniqueDiagnoses = [...new Set(history.map(h => h.diagnosis))]
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated && !loading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        {/* Sidebar */}
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+
+        {/* Main Content */}
+        <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Authentication Required</h2>
+              <p className="text-gray-600 mb-6">Please log in to view patient history.</p>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Go to Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
