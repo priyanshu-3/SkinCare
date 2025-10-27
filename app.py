@@ -1460,8 +1460,17 @@ def get_analysis_detail(analysis_id):
     """Get detailed information for a specific analysis"""
     print(f"DEBUG: Received request for analysis ID: {analysis_id}")
     try:
-        # Build query based on user type
-        if hasattr(current_user, 'username') and not current_user.is_anonymous:  # It's a patient
+        # Get patient_email parameter if provided
+        patient_email = request.args.get('patient_email')
+        
+        # Build query based on user type and parameters
+        if patient_email:
+            # If patient_email parameter is provided, filter by it
+            analysis = Analysis.query.filter_by(
+                id=analysis_id,
+                patient_email=patient_email
+            ).first()
+        elif hasattr(current_user, 'username') and not current_user.is_anonymous:  # It's a patient
             analysis = Analysis.query.filter_by(
                 id=analysis_id,
                 patient_email=current_user.email
@@ -1477,7 +1486,7 @@ def get_analysis_detail(analysis_id):
         
         print(f"DEBUG: Found analysis: {analysis is not None}")
         if analysis:
-            print(f"DEBUG: Analysis details - ID: {analysis.id}, Patient: {analysis.patient_name}")
+            print(f"DEBUG: Analysis details - ID: {analysis.id}, Patient: {analysis.patient_name}, Email: {analysis.patient_email}")
         
         if not analysis:
             print(f"DEBUG: Analysis not found for ID: {analysis_id}")

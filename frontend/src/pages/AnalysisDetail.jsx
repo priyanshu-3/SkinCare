@@ -14,7 +14,18 @@ export default function AnalysisDetail() {
       try {
         setLoading(true)
         console.log('Fetching analysis for ID:', id)
-        const response = await fetch(`http://localhost:5001/api/history/${id}`, {
+        
+        // Get patient email from localStorage if available
+        const patientData = JSON.parse(localStorage.getItem('patient') || '{}')
+        const patientEmail = patientData.email
+        
+        // Build URL with patient_email parameter if available
+        let url = `http://localhost:5001/api/history/${id}`
+        if (patientEmail) {
+          url += `?patient_email=${encodeURIComponent(patientEmail)}`
+        }
+        
+        const response = await fetch(url, {
           credentials: 'include'
         })
         
