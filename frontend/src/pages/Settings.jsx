@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
-import { Settings as SettingsIcon, User, Bell, Lock, Database, Palette, Info } from 'lucide-react'
+import { Settings as SettingsIcon, User, Bell, Lock, Database, Palette, Info, LogOut, Heart, History } from 'lucide-react'
 
 export default function Settings() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
+  
+  // Determine if this is a patient settings page
+  const isPatientSettings = location.pathname === '/patient-settings'
   const [activeTab, setActiveTab] = useState('profile')
   const [passwordData, setPasswordData] = useState({
     current_password: '',
@@ -65,13 +69,18 @@ export default function Settings() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/user/profile', {
+      // Use different API endpoint based on user type
+      const endpoint = isPatientSettings 
+        ? 'http://localhost:5001/api/patient/profile' 
+        : 'http://localhost:5001/api/user/profile'
+        
+      const response = await fetch(endpoint, {
         credentials: 'include'
       })
       const data = await response.json()
       
       if (response.ok) {
-        setProfileData(data.profile)
+        setProfileData(data.profile || data)
       } else {
         setError(data.error || 'Failed to load profile')
       }
@@ -80,7 +89,13 @@ export default function Settings() {
     }
   }
 
-  const tabs = [
+  const tabs = isPatientSettings ? [
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'security', label: 'Security', icon: Lock },
+    { id: 'data', label: 'Data & Privacy', icon: Database },
+    { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'about', label: 'About', icon: Info },
+  ] : [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Lock },
@@ -89,13 +104,80 @@ export default function Settings() {
     { id: 'about', label: 'About', icon: Info },
   ]
 
+  const handleLogout = async () => {
+    try {
+      const endpoint = isPatientSettings 
+        ? 'http://localhost:5001/api/patient/logout'
+        : 'http://localhost:5001/api/logout'
+        
+      await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'include'
+      })
+    } catch (err) {
+      console.error('Logout error:', err)
+    } finally {
+      localStorage.removeItem(isPatientSettings ? 'patient' : 'user')
+      localStorage.removeItem('userType')
+      navigate(isPatientSettings ? '/patient-login' : '/login')
+    }
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      {isPatientSettings ? (
+        <div className="w-64 bg-blue-900 text-white flex flex-col">
+          {/* Logo */}
+          <div className="p-6 border-b border-blue-800">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                <Heart className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold">SkinCare AI</h1>
+                <p className="text-xs text-blue-200">Detection System</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4">
+            <div className="space-y-2">
+              <div 
+                onClick={() => navigate('/patient-dashboard')}
+                className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer"
+              >
+                <History className="w-5 h-5 mr-3" />
+                <span>History</span>
+              </div>
+            </div>
+          </nav>
+
+          {/* Bottom Navigation */}
+          <div className="p-4 border-t border-blue-800">
+            <div className="space-y-2">
+              <div className="flex items-center px-3 py-2 bg-blue-800 rounded-lg">
+                <Settings className="w-5 h-5 mr-3" />
+                <span>Settings</span>
+                <div className="w-2 h-2 bg-blue-300 rounded-full ml-auto"></div>
+              </div>
+              <div 
+                onClick={handleLogout}
+                className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer"
+              >
+                <LogOut className="w-5 h-5 mr-3" />
+                <span>Logout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      )}
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <div className={`flex-1 transition-all duration-300 ${!isPatientSettings && (collapsed ? 'ml-20' : 'ml-64')}`}>
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="px-8 py-4">

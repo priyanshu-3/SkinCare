@@ -178,7 +178,10 @@ export default function PatientDashboard() {
         {/* Bottom Navigation */}
         <div className="p-4 border-t border-blue-800">
           <div className="space-y-2">
-            <div className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer">
+            <div 
+              onClick={() => navigate('/patient-settings')}
+              className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer"
+            >
               <Settings className="w-5 h-5 mr-3" />
               <span>Settings</span>
             </div>
