@@ -346,6 +346,7 @@ class Analysis(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Admin/doctor who performed analysis
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=True)  # Patient account
     patient_name = db.Column(db.String(120), nullable=False)
+    patient_email = db.Column(db.String(255))  # Patient email
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(255))  # City/location
@@ -365,6 +366,7 @@ class Analysis(db.Model):
         return {
             'id': self.id,
             'patient_name': self.patient_name,
+            'patient_email': self.patient_email,
             'age': self.age,
             'gender': self.gender,
             'location': self.location,
@@ -647,6 +649,7 @@ def analyze():
         age = request.form.get('age', '').strip()
         gender = request.form.get('gender', '').strip()
         location = request.form.get('location', 'Unknown').strip()
+        email = request.form.get('email', '').strip()
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
 
@@ -984,6 +987,7 @@ def analyze():
                 user_id=user_id,
                 patient_id=patient_id,
                 patient_name=name,
+                patient_email=email,
                 age=int(age),
                 gender=gender,
                 location=location,
@@ -1475,6 +1479,7 @@ def export_history_csv():
         writer.writerow([
             'ID',
             'Patient Name',
+            'Patient Email',
             'Age',
             'Gender',
             'Location',
@@ -1490,6 +1495,7 @@ def export_history_csv():
             writer.writerow([
                 analysis.id,
                 analysis.patient_name,
+                analysis.patient_email or 'N/A',
                 analysis.age,
                 analysis.gender,
                 analysis.location or 'N/A',

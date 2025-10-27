@@ -23,7 +23,8 @@ export default function AnalysisNew() {
     name: '',
     age: '',
     gender: '',
-    location: ''
+    location: '',
+    email: ''
   })
 
   // GPS location state
@@ -158,6 +159,7 @@ export default function AnalysisNew() {
       formData.append('age', age)
       formData.append('gender', gender)
       formData.append('location', patientInfo.location || '')
+      formData.append('email', patientInfo.email || '')
 
       const response = await fetch('http://localhost:5001/analyze', {
         method: 'POST',
@@ -381,6 +383,18 @@ export default function AnalysisNew() {
                         onChange={(e) => setPatientInfo({ ...patientInfo, name: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Enter patient name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={patientInfo.email}
+                        onChange={(e) => setPatientInfo({ ...patientInfo, email: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter patient email (optional)"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
