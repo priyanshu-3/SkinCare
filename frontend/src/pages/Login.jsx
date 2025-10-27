@@ -145,6 +145,16 @@ export default function Login() {
                 Create one now
               </Link>
             </div>
+
+            <div className="text-center mt-4 text-gray-600 text-sm">
+              Are you a patient?{' '}
+              <Link
+                to="/patient-login"
+                className="text-green-600 font-semibold hover:text-green-800 hover:underline transition-colors"
+              >
+                Patient Login
+              </Link>
+            </div>
           </div>
         </div>
 

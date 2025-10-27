@@ -6,7 +6,10 @@ Flask app with Roboflow model integration and Groq LLM for medical advice
 import os
 import json
 import base64
+import secrets
+import string
 from io import BytesIO
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -277,7 +280,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default='patient', nullable=False)  # patient | doctor | admin
+    role = db.Column(db.String(20), default='admin', nullable=False)  # patient | doctor | admin
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     
     # Relationship to analyses
@@ -290,10 +293,58 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+class Patient(db.Model, UserMixin):
+    """Model for patient accounts"""
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    full_name = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20))
+    date_of_birth = db.Column(db.Date)
+    gender = db.Column(db.String(20))
+    address = db.Column(db.Text)
+    emergency_contact = db.Column(db.String(120))
+    emergency_phone = db.Column(db.String(20))
+    is_active = db.Column(db.Boolean, default=True)
+    email_verified = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    last_login = db.Column(db.DateTime)
+    
+    # Relationship to analyses
+    analyses = db.relationship('Analysis', backref='patient', lazy=True, foreign_keys='Analysis.patient_id')
+
+    def set_password(self, password: str) -> None:
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self):
+        """Convert patient record to dictionary"""
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'full_name': self.full_name,
+            'phone': self.phone,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
+            'gender': self.gender,
+            'address': self.address,
+            'emergency_contact': self.emergency_contact,
+            'emergency_phone': self.emergency_phone,
+            'is_active': self.is_active,
+            'email_verified': self.email_verified,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_login': self.last_login.isoformat() if self.last_login else None
+        }
+
+
 class Analysis(db.Model):
     """Model for storing patient analysis records"""
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Admin/doctor who performed analysis
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=True)  # Patient account
     patient_name = db.Column(db.String(120), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(20), nullable=False)
@@ -919,8 +970,19 @@ def analyze():
 
         # Save analysis to database
         try:
+            # Check if current user is a patient
+            patient_id = None
+            user_id = None
+            
+            if current_user.is_authenticated:
+                if hasattr(current_user, 'username'):  # It's a patient
+                    patient_id = current_user.id
+                else:  # It's an admin/doctor
+                    user_id = current_user.id
+            
             analysis_record = Analysis(
-                user_id=current_user.id,
+                user_id=user_id,
+                patient_id=patient_id,
                 patient_name=name,
                 age=int(age),
                 gender=gender,
@@ -1066,6 +1128,225 @@ def logout():
     return redirect(url_for('login'))
 
 
+# ===== Patient Authentication API Endpoints =====
+
+@app.route('/api/patient/register', methods=['POST'])
+def patient_register():
+    """Register a new patient account"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['username', 'email', 'password', 'full_name']
+        for field in required_fields:
+            if not data.get(field, '').strip():
+                return jsonify({'error': f'{field.replace("_", " ").title()} is required'}), 400
+        
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        full_name = data.get('full_name', '').strip()
+        
+        # Validate password strength
+        if len(password) < 8:
+            return jsonify({'error': 'Password must be at least 8 characters long'}), 400
+        
+        # Check if username or email already exists
+        if Patient.query.filter_by(username=username).first():
+            return jsonify({'error': 'Username already taken'}), 400
+        
+        if Patient.query.filter_by(email=email).first():
+            return jsonify({'error': 'Email already registered'}), 400
+        
+        # Create new patient
+        patient = Patient(
+            username=username,
+            email=email,
+            full_name=full_name,
+            phone=data.get('phone', '').strip() or None,
+            date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d').date() if data.get('date_of_birth') else None,
+            gender=data.get('gender', '').strip() or None,
+            address=data.get('address', '').strip() or None,
+            emergency_contact=data.get('emergency_contact', '').strip() or None,
+            emergency_phone=data.get('emergency_phone', '').strip() or None
+        )
+        patient.set_password(password)
+        
+        db.session.add(patient)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Patient account created successfully',
+            'patient_id': patient.id
+        }), 201
+        
+    except ValueError as e:
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Registration failed. Please try again.'}), 500
+
+
+@app.route('/api/patient/login', methods=['POST'])
+def patient_login():
+    """Login for patient accounts"""
+    try:
+        data = request.get_json()
+        username_or_email = data.get('username_or_email', '').strip()
+        password = data.get('password', '')
+        
+        if not all([username_or_email, password]):
+            return jsonify({'error': 'Username/email and password are required'}), 400
+        
+        # Try to find patient by username or email
+        patient = Patient.query.filter(
+            (Patient.username == username_or_email) | 
+            (Patient.email == username_or_email)
+        ).first()
+        
+        if patient and patient.check_password(password) and patient.is_active:
+            # Update last login
+            patient.last_login = datetime.utcnow()
+            db.session.commit()
+            
+            login_user(patient)
+            return jsonify({
+                'success': True,
+                'message': 'Login successful',
+                'patient': patient.to_dict()
+            }), 200
+        else:
+            return jsonify({'error': 'Invalid credentials or account inactive'}), 401
+            
+    except Exception as e:
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
+
+
+@app.route('/api/patient/logout', methods=['POST'])
+def patient_logout():
+    """Logout for patient accounts"""
+    try:
+        logout_user()
+        return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': 'Logout failed'}), 500
+
+
+@app.route('/api/patient/profile', methods=['GET', 'PUT'])
+@login_required
+def patient_profile():
+    """Get or update patient profile"""
+    try:
+        if not hasattr(current_user, 'username'):  # Check if it's a patient
+            return jsonify({'error': 'Access denied'}), 403
+        
+        if request.method == 'GET':
+            return jsonify({
+                'success': True,
+                'profile': current_user.to_dict()
+            }), 200
+        
+        elif request.method == 'PUT':
+            data = request.get_json()
+            
+            # Update allowed fields
+            if 'full_name' in data:
+                current_user.full_name = data['full_name'].strip()
+            if 'phone' in data:
+                current_user.phone = data['phone'].strip() or None
+            if 'date_of_birth' in data and data['date_of_birth']:
+                current_user.date_of_birth = datetime.strptime(data['date_of_birth'], '%Y-%m-%d').date()
+            if 'gender' in data:
+                current_user.gender = data['gender'].strip() or None
+            if 'address' in data:
+                current_user.address = data['address'].strip() or None
+            if 'emergency_contact' in data:
+                current_user.emergency_contact = data['emergency_contact'].strip() or None
+            if 'emergency_phone' in data:
+                current_user.emergency_phone = data['emergency_phone'].strip() or None
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'profile': current_user.to_dict()
+            }), 200
+            
+    except ValueError as e:
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Profile update failed'}), 500
+
+
+@app.route('/api/patient/change-password', methods=['POST'])
+@login_required
+def patient_change_password():
+    """Change patient password"""
+    try:
+        if not hasattr(current_user, 'username'):  # Check if it's a patient
+            return jsonify({'error': 'Access denied'}), 403
+        
+        data = request.get_json()
+        current_password = data.get('current_password', '')
+        new_password = data.get('new_password', '')
+        
+        if not all([current_password, new_password]):
+            return jsonify({'error': 'Current password and new password are required'}), 400
+        
+        if len(new_password) < 8:
+            return jsonify({'error': 'New password must be at least 8 characters long'}), 400
+        
+        if not current_user.check_password(current_password):
+            return jsonify({'error': 'Current password is incorrect'}), 400
+        
+        current_user.set_password(new_password)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password changed successfully'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Password change failed'}), 500
+
+
+@app.route('/api/patient/forgot-password', methods=['POST'])
+def patient_forgot_password():
+    """Request password reset for patient"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        patient = Patient.query.filter_by(email=email).first()
+        if not patient:
+            # Don't reveal if email exists for security
+            return jsonify({
+                'success': True,
+                'message': 'If the email exists, a password reset link has been sent'
+            }), 200
+        
+        # Generate reset token (in a real app, you'd send this via email)
+        reset_token = secrets.token_urlsafe(32)
+        # Store token in database with expiration (simplified for demo)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password reset instructions sent to your email',
+            'reset_token': reset_token  # In production, don't return this
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': 'Password reset request failed'}), 500
+
+
 # ===== Patient History API Endpoints =====
 
 @app.route('/api/history', methods=['GET'])
@@ -1079,8 +1360,11 @@ def get_patient_history():
         end_date = request.args.get('end_date')
         diagnosis = request.args.get('diagnosis')
         
-        # Base query - get all analyses for current user
-        query = Analysis.query.filter_by(user_id=current_user.id)
+        # Build query based on user type
+        if hasattr(current_user, 'username'):  # It's a patient
+            query = Analysis.query.filter_by(patient_id=current_user.id)
+        else:  # It's an admin/doctor
+            query = Analysis.query.filter_by(user_id=current_user.id)
         
         # Apply search filter (searches name, location, diagnosis)
         if search:
@@ -1139,10 +1423,17 @@ def get_patient_history():
 def get_analysis_detail(analysis_id):
     """Get detailed information for a specific analysis"""
     try:
-        analysis = Analysis.query.filter_by(
-            id=analysis_id,
-            user_id=current_user.id
-        ).first()
+        # Build query based on user type
+        if hasattr(current_user, 'username'):  # It's a patient
+            analysis = Analysis.query.filter_by(
+                id=analysis_id,
+                patient_id=current_user.id
+            ).first()
+        else:  # It's an admin/doctor
+            analysis = Analysis.query.filter_by(
+                id=analysis_id,
+                user_id=current_user.id
+            ).first()
         
         if not analysis:
             return jsonify({'error': 'Analysis not found'}), 404
@@ -1166,10 +1457,15 @@ def export_history_csv():
         from io import StringIO
         from flask import make_response
         
-        # Get all analyses for current user
-        analyses = Analysis.query.filter_by(
-            user_id=current_user.id
-        ).order_by(Analysis.created_at.desc()).all()
+        # Get all analyses for current user based on user type
+        if hasattr(current_user, 'username'):  # It's a patient
+            analyses = Analysis.query.filter_by(
+                patient_id=current_user.id
+            ).order_by(Analysis.created_at.desc()).all()
+        else:  # It's an admin/doctor
+            analyses = Analysis.query.filter_by(
+                user_id=current_user.id
+            ).order_by(Analysis.created_at.desc()).all()
         
         # Create CSV in memory
         si = StringIO()
@@ -1288,7 +1584,11 @@ def change_password():
 def get_history_stats():
     """Get statistics about patient history"""
     try:
-        analyses = Analysis.query.filter_by(user_id=current_user.id).all()
+        # Get analyses based on user type
+        if hasattr(current_user, 'username'):  # It's a patient
+            analyses = Analysis.query.filter_by(patient_id=current_user.id).all()
+        else:  # It's an admin/doctor
+            analyses = Analysis.query.filter_by(user_id=current_user.id).all()
         
         if not analyses:
             return jsonify({
