@@ -257,7 +257,7 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 # Enable CORS for React frontend with credentials support
-CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'http://127.0.0.1:5173'])
 
 # Configuration
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
