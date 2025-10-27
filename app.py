@@ -1629,8 +1629,9 @@ def get_history_stats():
             confidence_sum += analysis.confidence
         
         # Convert latest date to IST
-        latest_utc = max(a.created_at for a in analyses if a.created_at is not None)
-        if latest_utc:
+        valid_dates = [a.created_at for a in analyses if a.created_at is not None]
+        if valid_dates:
+            latest_utc = max(valid_dates)
             latest_ist = latest_utc + timedelta(hours=5, minutes=30)
             latest_date = latest_ist.strftime('%Y-%m-%d %H:%M:%S')
         else:
