@@ -1214,6 +1214,75 @@ def export_history_csv():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/user/profile', methods=['GET', 'POST'])
+@login_required
+def user_profile():
+    """Get or update user profile"""
+    try:
+        if request.method == 'GET':
+            user = User.query.get(current_user.id)
+            return jsonify({
+                'success': True,
+                'profile': {
+                    'name': user.name,
+                    'email': user.email,
+                    'role': user.role
+                }
+            })
+        else:  # POST
+            data = request.get_json() if request.is_json else request.form
+            name = data.get('name', '').strip()
+            role = data.get('role', '').strip()
+
+            if not name:
+                return jsonify({'error': 'Name is required'}), 400
+
+            user = User.query.get(current_user.id)
+            user.name = name
+            if role in ['doctor', 'nurse', 'administrator', 'technician', 'patient']:
+                user.role = role
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'profile': {
+                    'name': user.name,
+                    'email': user.email,
+                    'role': user.role
+                }
+            }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/user/change-password', methods=['POST'])
+@login_required
+def change_password():
+    """Change user password"""
+    try:
+        data = request.get_json() if request.is_json else request.form
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        if not all([current_password, new_password, confirm_password]):
+            return jsonify({'error': 'All password fields are required'}), 400
+
+        if new_password != confirm_password:
+            return jsonify({'error': 'New passwords do not match'}), 400
+
+        user = User.query.get(current_user.id)
+        if not user.check_password(current_password):
+            return jsonify({'error': 'Current password is incorrect'}), 401
+
+        user.set_password(new_password)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Password updated successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/history/stats', methods=['GET'])
 @login_required
 def get_history_stats():
