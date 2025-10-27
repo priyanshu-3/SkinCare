@@ -6,7 +6,6 @@ import {
   Activity, 
   FileText, 
   LogOut, 
-  Plus, 
   Eye, 
   Download,
   AlertCircle,
@@ -206,11 +205,11 @@ export default function PatientDashboard() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
             <div className="flex flex-wrap gap-4">
               <button
-                onClick={() => navigate('/analysis')}
+                onClick={() => navigate('/patient-history')}
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                New Analysis
+                <FileText className="h-4 w-4 mr-2" />
+                View All History
               </button>
               <button
                 onClick={() => navigate('/patient-profile')}
@@ -232,15 +231,9 @@ export default function PatientDashboard() {
           {analyses.length === 0 ? (
             <div className="p-6 text-center">
               <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No analyses yet</h3>
-              <p className="text-gray-600 mb-4">Start by uploading an image for analysis</p>
-              <button
-                onClick={() => navigate('/analysis')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Start Analysis
-              </button>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No analyses found</h3>
+              <p className="text-gray-600 mb-4">Your analysis history will appear here when a doctor performs an analysis linked to your email address</p>
+              <p className="text-sm text-gray-500">Contact your healthcare provider to have your skin analysis performed</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
