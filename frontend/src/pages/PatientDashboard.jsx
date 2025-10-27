@@ -62,7 +62,7 @@ export default function PatientDashboard() {
 
       if (analysesRes.ok) {
         const analysesData = await analysesRes.json()
-        setAnalyses(analysesData.analyses || [])
+        setAnalyses(analysesData.history || analysesData.analyses || [])
       } else {
         console.error('Failed to fetch analyses:', analysesRes.status)
       }
