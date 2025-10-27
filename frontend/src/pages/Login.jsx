@@ -191,7 +191,7 @@ export default function Login() {
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <i className="fas fa-stethoscope text-green-600"></i>
+                      <i className="fas fa-microscope text-green-600"></i>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Test Doctor</p>
