@@ -39,6 +39,15 @@ export default function Settings() {
   }, [])
 
   useEffect(() => {
+    // Check authentication for patient settings
+    if (isPatientSettings) {
+      const patientData = localStorage.getItem('patient')
+      if (!patientData) {
+        navigate('/patient-login')
+        return
+      }
+    }
+
     // Fetch user profile when component mounts
     fetchProfile()
 
@@ -65,7 +74,7 @@ export default function Settings() {
     }
     mediaQuery.addEventListener('change', handleThemeChange)
     return () => mediaQuery.removeEventListener('change', handleThemeChange)
-  }, [])
+  }, [isPatientSettings, navigate])
 
   const fetchProfile = async () => {
     try {
