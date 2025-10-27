@@ -32,6 +32,7 @@ export default function PatientDashboard() {
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [activeView, setActiveView] = useState('dashboard') // 'dashboard' or 'history'
 
   useEffect(() => {
     // Check if patient is logged in
@@ -118,6 +119,24 @@ export default function PatientDashboard() {
     return analyses.filter(a => a.diagnosis === diagnosis).length
   }
 
+  const generateCSV = (data) => {
+    const headers = ['Patient Name', 'Age', 'Gender', 'Email', 'Location', 'Diagnosis', 'Confidence (%)', 'Date']
+    const csvContent = [
+      headers.join(','),
+      ...data.map(analysis => [
+        `"${analysis.patient_name || ''}"`,
+        analysis.age || '',
+        analysis.gender || '',
+        `"${analysis.patient_email || ''}"`,
+        `"${analysis.location || ''}"`,
+        `"${analysis.diagnosis || ''}"`,
+        analysis.confidence ? (analysis.confidence / 100).toFixed(2) : '',
+        analysis.created_at ? new Date(analysis.created_at).toLocaleDateString() : ''
+      ].join(','))
+    ].join('\n')
+    return csvContent
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -150,8 +169,12 @@ export default function PatientDashboard() {
         <nav className="flex-1 p-4">
           <div className="space-y-2">
             <div 
-              onClick={() => navigate('/patient-history')}
-              className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer"
+              onClick={() => setActiveView(activeView === 'history' ? 'dashboard' : 'history')}
+              className={`flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                activeView === 'history' 
+                  ? 'bg-blue-800 text-white' 
+                  : 'text-blue-200 hover:bg-blue-800'
+              }`}
             >
               <History className="w-5 h-5 mr-3" />
               <span>History</span>
@@ -209,6 +232,10 @@ export default function PatientDashboard() {
               </div>
             </div>
           )}
+
+          {activeView === 'dashboard' ? (
+            // Dashboard Content
+            <div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -304,7 +331,7 @@ export default function PatientDashboard() {
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Recent Analyses</h2>
                     <button 
-                      onClick={() => navigate('/patient-history')}
+                      onClick={() => setActiveView('history')}
                       className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
                     >
                       View All <ArrowRight className="w-4 h-4 ml-1" />
@@ -380,7 +407,7 @@ export default function PatientDashboard() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                 <div className="space-y-3">
                   <button 
-                    onClick={() => navigate('/patient-history')}
+                    onClick={() => setActiveView('history')}
                     className="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     <History className="w-5 h-5 mr-2" />
@@ -416,6 +443,99 @@ export default function PatientDashboard() {
               </div>
             </div>
           </div>
+            </div>
+          ) : (
+            // History Content
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900">Analysis History</h2>
+                    <button 
+                      onClick={() => {
+                        const csvContent = generateCSV(analyses)
+                        const blob = new Blob([csvContent], { type: 'text/csv' })
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'analysis_history.csv'
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                      }}
+                      className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </button>
+                  </div>
+                </div>
+                
+                {analyses.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No analyses found</h3>
+                    <p className="text-gray-600 mb-4">Your analysis history will appear here when a doctor performs an analysis linked to your email address</p>
+                    <p className="text-sm text-gray-500">Contact your healthcare provider to have your skin analysis performed</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {analyses.map((analysis) => (
+                      <div key={analysis.id} className="p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="text-sm font-medium text-gray-900">
+                                {analysis.patient_name}
+                              </h3>
+                              <span className="text-sm text-gray-500">
+                                {analysis.age} yrs, {analysis.gender}
+                              </span>
+                              {analysis.patient_email && (
+                                <span className="text-sm text-gray-500">
+                                  {analysis.patient_email}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRiskColor(analysis.diagnosis)}`}>
+                                {analysis.diagnosis}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {analysis.confidence}%
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(analysis.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => navigate(`/analysis-detail/${analysis.id}`)}
+                              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            {analysis.report_path && (
+                              <a
+                                href={`http://localhost:5001${analysis.report_path}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Download Report"
+                              >
+                                <Download className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
