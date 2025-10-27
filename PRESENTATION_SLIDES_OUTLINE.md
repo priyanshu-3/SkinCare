@@ -31,17 +31,17 @@
 
 ```
 ┌────────────────────────────────────────────┐
-│  Current Skin Cancer Detection Systems    │
-│  Have Critical Limitations:               │
+│  Current Skin Cancer Detection Systems     │
+│  Have Critical Limitations:                │
 │                                            │
-│  ❌ Only see RGB (3 channels)             │
-│     → Miss melanin/blood patterns         │
+│  ❌ Only see RGB (3 channels)              │
+│     → Miss melanin/blood patterns          │
 │                                            │
-│  ❌ Train on single snapshots             │
-│     → No temporal understanding           │
+│  ❌ Train on single snapshots              │
+│     → No temporal understanding            │
 │                                            │
-│  ❌ Ignore patient context                │
-│     → Miss age/gender/location risks      │
+│  ❌ Ignore patient context                 │
+│     → Miss age/gender/location risks       │
 │                                            │
 │  ❌ Biased toward light skin (80%+ data)  │
 │     → Dangerous healthcare disparities    │
