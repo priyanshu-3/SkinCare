@@ -383,7 +383,17 @@ class Analysis(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    # Try to load as User first
+    user = User.query.get(int(user_id))
+    if user:
+        return user
+    
+    # If not found as User, try to load as Patient
+    patient = Patient.query.get(int(user_id))
+    if patient:
+        return patient
+    
+    return None
 
 
 def init_db():
