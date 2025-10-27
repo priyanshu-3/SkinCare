@@ -1604,6 +1604,7 @@ def get_history_stats():
         if hasattr(current_user, 'username'):  # It's a patient
             analyses = Analysis.query.filter_by(patient_id=current_user.id).all()
         else:  # It's an admin/doctor
+            # Get all analyses where this doctor is the user_id (including patient analyses they performed)
             analyses = Analysis.query.filter_by(user_id=current_user.id).all()
         
         if not analyses:
@@ -1628,9 +1629,12 @@ def get_history_stats():
             confidence_sum += analysis.confidence
         
         # Convert latest date to IST
-        latest_utc = max(a.created_at for a in analyses)
-        latest_ist = latest_utc + timedelta(hours=5, minutes=30)
-        latest_date = latest_ist.strftime('%Y-%m-%d %H:%M:%S')
+        latest_utc = max(a.created_at for a in analyses if a.created_at is not None)
+        if latest_utc:
+            latest_ist = latest_utc + timedelta(hours=5, minutes=30)
+            latest_date = latest_ist.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            latest_date = None
         
         return jsonify({
             'success': True,
