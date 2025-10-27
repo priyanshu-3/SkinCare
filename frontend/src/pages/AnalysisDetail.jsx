@@ -13,14 +13,21 @@ export default function AnalysisDetail() {
     const fetchAnalysis = async () => {
       try {
         setLoading(true)
+        console.log('Fetching analysis for ID:', id)
         const response = await fetch(`http://localhost:5001/api/history/${id}`, {
           credentials: 'include'
         })
         
+        console.log('Response status:', response.status)
+        console.log('Response ok:', response.ok)
+        
         if (response.ok) {
           const data = await response.json()
+          console.log('Response data:', data)
           setAnalysis(data.analysis)
         } else {
+          const errorText = await response.text()
+          console.log('Error response:', errorText)
           setError('Analysis not found')
         }
       } catch (err) {
