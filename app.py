@@ -266,6 +266,11 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Session configuration
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -1381,9 +1386,16 @@ def get_patient_history():
         
         # Build query based on user type
         if hasattr(current_user, 'username'):  # It's a patient
-            query = Analysis.query.filter_by(patient_id=current_user.id)
+            # Filter by patient email for patient users
+            query = Analysis.query.filter_by(patient_email=current_user.email)
         else:  # It's an admin/doctor
             query = Analysis.query.filter_by(user_id=current_user.id)
+        
+        # For patient requests, also check if patient_email is provided as parameter
+        patient_email = request.args.get('patient_email')
+        if patient_email and hasattr(current_user, 'username'):
+            # If patient_email parameter is provided and user is a patient, filter by it
+            query = Analysis.query.filter_by(patient_email=patient_email)
         
         # Apply search filter (searches name, location, diagnosis)
         if search:
@@ -1446,7 +1458,7 @@ def get_analysis_detail(analysis_id):
         if hasattr(current_user, 'username'):  # It's a patient
             analysis = Analysis.query.filter_by(
                 id=analysis_id,
-                patient_id=current_user.id
+                patient_email=current_user.email
             ).first()
         else:  # It's an admin/doctor
             analysis = Analysis.query.filter_by(
@@ -1612,7 +1624,8 @@ def get_history_stats():
     try:
         # Get analyses based on user type
         if hasattr(current_user, 'username'):  # It's a patient
-            analyses = Analysis.query.filter_by(patient_id=current_user.id).all()
+            # Filter by patient email for patient users
+            analyses = Analysis.query.filter_by(patient_email=current_user.email).all()
         else:  # It's an admin/doctor
             # Get all analyses where this doctor is the user_id (including patient analyses they performed)
             analyses = Analysis.query.filter_by(user_id=current_user.id).all()
