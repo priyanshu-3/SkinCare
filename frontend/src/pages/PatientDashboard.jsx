@@ -149,15 +149,6 @@ export default function PatientDashboard() {
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <div className="space-y-2">
-            <div className="flex items-center px-3 py-2 bg-blue-800 rounded-lg opacity-50 cursor-not-allowed">
-              <Grid3X3 className="w-5 h-5 mr-3" />
-              <span className="font-medium">Dashboard</span>
-              <div className="w-2 h-2 bg-blue-300 rounded-full ml-auto"></div>
-            </div>
-            <div className="flex items-center px-3 py-2 text-blue-200 opacity-50 cursor-not-allowed">
-              <Stethoscope className="w-5 h-5 mr-3" />
-              <span>New Analysis</span>
-            </div>
             <div className="flex items-center px-3 py-2 text-blue-200 hover:bg-blue-800 rounded-lg cursor-pointer">
               <History className="w-5 h-5 mr-3" />
               <span>History</span>
@@ -385,14 +376,6 @@ export default function PatientDashboard() {
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                 <div className="space-y-3">
-                  <button className="w-full flex items-center justify-center px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed opacity-50" disabled>
-                    <Upload className="w-5 h-5 mr-2" />
-                    Upload Image
-                  </button>
-                  <button className="w-full flex items-center justify-center px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed opacity-50" disabled>
-                    <Camera className="w-5 h-5 mr-2" />
-                    Use Camera
-                  </button>
                   <button 
                     onClick={() => navigate('/patient-history')}
                     className="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
