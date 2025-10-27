@@ -140,7 +140,6 @@ export default function DashboardNew() {
               icon={Clock}
               label="This Week"
               value={recentAnalyses.length}
-              trend="+12% from last week"
               color="#F59E0B"
             />
           </div>
