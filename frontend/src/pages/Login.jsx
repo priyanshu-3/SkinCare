@@ -163,7 +163,7 @@ export default function Login() {
                 <div 
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition-colors"
                   onClick={() => {
-                    setEmail('singhravish2900@gmail.com')
+                    setEmail('priyanshu@gmail.com')
                     setPassword('admin123')
                   }}
                 >
@@ -173,7 +173,7 @@ export default function Login() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Admin User</p>
-                      <p className="text-xs text-gray-500">singhravish2900@gmail.com</p>
+                      <p className="text-xs text-gray-500">priyanshu@gmail.com</p>
                     </div>
                   </div>
                   <div className="text-right">
