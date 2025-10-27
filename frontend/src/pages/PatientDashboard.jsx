@@ -50,12 +50,16 @@ export default function PatientDashboard() {
       setLoading(true)
       setError('')
       
+      // Get patient email from localStorage
+      const patientData = JSON.parse(localStorage.getItem('patient') || '{}')
+      const patientEmail = patientData.email
+      
       // Fetch analyses and stats
       const [analysesRes, statsRes] = await Promise.all([
-        fetch('http://localhost:5001/api/history', {
+        fetch(`http://localhost:5001/api/history?patient_email=${encodeURIComponent(patientEmail)}`, {
           credentials: 'include'
         }),
-        fetch('http://localhost:5001/api/history/stats', {
+        fetch(`http://localhost:5001/api/history/stats?patient_email=${encodeURIComponent(patientEmail)}`, {
           credentials: 'include'
         })
       ])
