@@ -362,7 +362,12 @@ class Analysis(db.Model):
     def to_dict(self):
         """Convert analysis record to dictionary"""
         # Convert UTC to IST (UTC + 5:30) for display
-        ist_time = self.created_at + timedelta(hours=5, minutes=30)
+        if self.created_at:
+            ist_time = self.created_at + timedelta(hours=5, minutes=30)
+            created_at_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            created_at_str = None
+            
         return {
             'id': self.id,
             'patient_name': self.patient_name,
@@ -377,7 +382,7 @@ class Analysis(db.Model):
             'report_path': self.report_path,
             'all_predictions': json.loads(self.all_predictions) if self.all_predictions else [],
             'llm_advice': self.llm_advice,
-            'created_at': ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': created_at_str
         }
 
 
@@ -1501,7 +1506,12 @@ def export_history_csv():
         # Write data rows
         for analysis in analyses:
             # Convert UTC to IST (UTC + 5:30) for CSV export
-            ist_time = analysis.created_at + timedelta(hours=5, minutes=30)
+            if analysis.created_at:
+                ist_time = analysis.created_at + timedelta(hours=5, minutes=30)
+                created_at_str = ist_time.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                created_at_str = 'N/A'
+                
             writer.writerow([
                 analysis.id,
                 analysis.patient_name,
@@ -1511,7 +1521,7 @@ def export_history_csv():
                 analysis.location or 'N/A',
                 analysis.diagnosis,
                 f"{analysis.confidence * 100:.2f}",
-                ist_time.strftime('%Y-%m-%d %H:%M:%S')
+                created_at_str
             ])
         
         # Create response
