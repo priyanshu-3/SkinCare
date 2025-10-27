@@ -449,16 +449,16 @@ export default function PatientRegister() {
             </p>
           </div>
 
-              <div className="text-center">
-                <Link
-                  to="/login"
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Are you a doctor? <span className="text-green-600 font-medium hover:text-green-700">Admin Login</span>
-                </Link>
-              </div>
-            </form>
+          <div className="text-center">
+            <Link
+              to="/login"
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Are you a doctor? <span className="text-green-600 font-medium hover:text-green-700">Admin Login</span>
+            </Link>
           </div>
+        </form>
+      </div>
 
           {/* Footer */}
           <div className="px-8 py-4 bg-gray-50 text-center">

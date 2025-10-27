@@ -33,8 +33,13 @@ export default function DashboardNew() {
         credentials: 'include'
       })
       if (statsRes.ok) {
-        const data = await statsRes.json()
-        setStats(data.stats)
+        const contentType = statsRes.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const data = await statsRes.json()
+          setStats(data.stats)
+        } else {
+          console.log('Stats response is not JSON, likely redirected to login')
+        }
       }
 
       // Fetch recent analyses
@@ -42,8 +47,13 @@ export default function DashboardNew() {
         credentials: 'include'
       })
       if (historyRes.ok) {
-        const data = await historyRes.json()
-        setRecentAnalyses(data.history.slice(0, 5))
+        const contentType = historyRes.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const data = await historyRes.json()
+          setRecentAnalyses(data.history.slice(0, 5))
+        } else {
+          console.log('History response is not JSON, likely redirected to login')
+        }
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
