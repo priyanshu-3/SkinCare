@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, User, Lock, Mail, Phone, Calendar, MapPin, AlertCircle, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, User, Lock, Mail, Phone, Calendar, MapPin, AlertCircle, CheckCircle, ArrowRight, Shield, Heart, Zap } from 'lucide-react'
 
 export default function PatientRegister() {
   const navigate = useNavigate()
@@ -98,21 +98,38 @@ export default function PatientRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <User className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Main Registration Card */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header Section with Gradient */}
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-12 text-center">
+            <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+            <p className="text-white/90 text-sm mb-6">Join our platform to track your health analysis history</p>
+            
+            {/* Feature Tags */}
+            <div className="flex justify-center space-x-3">
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <Heart className="w-3 h-3" />
+                Personal
+              </span>
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                Secure
+              </span>
+              <span className="bg-white/20 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <Zap className="w-3 h-3" />
+                Fast
+              </span>
+            </div>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Create Patient Account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our platform to track your health analysis history
-          </p>
-        </div>
 
-        <form className="bg-white shadow-lg rounded-lg p-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Form Section */}
+          <div className="px-8 py-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
           <div className="border-b border-gray-200 pb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
@@ -403,15 +420,22 @@ export default function PatientRegister() {
             </div>
           )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </div>
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    'Creating Account...'
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
@@ -425,15 +449,25 @@ export default function PatientRegister() {
             </p>
           </div>
 
-          <div className="text-center">
-            <Link
-              to="/login"
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
-              ← Back to admin login
-            </Link>
+              <div className="text-center">
+                <Link
+                  to="/login"
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Are you a doctor? <span className="text-green-600 font-medium hover:text-green-700">Admin Login</span>
+                </Link>
+              </div>
+            </form>
           </div>
-        </form>
+
+          {/* Footer */}
+          <div className="px-8 py-4 bg-gray-50 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <Shield className="w-3 h-3" />
+              Your data is encrypted and secure
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
