@@ -1,8 +1,8 @@
-# 🏥 Skin Cancer Detection System
+#  Skin Cancer Detection System
 
 AI-powered skin cancer detection with machine learning analysis, explainable AI, and patient management.
 
-## ✨ Features
+##  Features
 
 - **AI Analysis**: XGBoost ensemble model with 7 skin lesion types detection
 - **Explainable AI**: Saliency maps and LLM-powered medical insights
@@ -11,7 +11,7 @@ AI-powered skin cancer detection with machine learning analysis, explainable AI,
 - **PDF Reports**: Professional medical reports generation
 - **Dashboard**: Real-time statistics and recent activity tracking
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.13+
@@ -48,7 +48,7 @@ npm run dev
 
 **Access:** http://localhost:3001
 
-## 🔑 Environment Variables
+## Environment Variables
 
 Required in `.env` file:
 
@@ -69,7 +69,7 @@ GROQ_API_KEY=your_groq_key
 SECRET_KEY=your_secret_key
 ```
 
-## 📱 Usage
+## Usage
 
 1. **Register/Login** - Create account or sign in
 2. **New Analysis** - Upload or capture skin lesion image
@@ -77,13 +77,13 @@ SECRET_KEY=your_secret_key
 4. **History** - Browse past analyses, export CSV, download PDF reports
 5. **Dashboard** - View statistics and recent activity
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 **Backend:** Flask, SQLAlchemy, PostgreSQL, Roboflow, Groq LLM, ReportLab  
 **Frontend:** React 18, Vite, React Router, Tailwind CSS  
 **ML/AI:** XGBoost Ensemble, Explainable AI (XAI), Saliency Mapping
 
-## 🏥 Skin Lesion Types Detected
+##  Skin Lesion Types Detected
 
 1. **Melanoma** 🔴 - High risk skin cancer
 2. **Basal Cell Carcinoma** 🔴 - Most common skin cancer
@@ -113,10 +113,10 @@ flask db upgrade
 pg_dump -U user dbname > backup.sql
 ```
 
-## 📄 License
+##  License
 
 MIT License - See LICENSE file for details
 
----
 
-**Version 2.0.0** | Built with Flask + React + PostgreSQL
+
+**Version 2.0.0**
