@@ -93,7 +93,7 @@ SECRET_KEY=your_secret_key
 6. **Melanocytic Nevi** 🟢 - Common moles
 7. **Vascular Lesions** 🟢 - Blood vessel lesions
 
-## 📊 Database
+## Database
 
 **PostgreSQL** is used for production with:
 - User authentication and management
